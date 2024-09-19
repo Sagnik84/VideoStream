@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decentralized Streaming Service</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <div class="logo">StreamIt</div>
+        <nav>
+            <ul>
+                <li><a href="#" onclick="showPage('home')">Home</a></li>
+                <li><a href="#" onclick="showPage('upload-video')">Upload Video</a></li>
+                <li><a href="#" onclick="showPage('wallet')">Wallet</a></li>
+                <li><a href="#" onclick="showPage('profile')">Profile</a></li>
+            </ul>
+        </nav>
+        <button id="connect-wallet">Connect Wallet</button>
+    </header>
+
+    <main>
+        <!-- Home Page -->
+        <section id="home" class="page active">
+            <h1>Featured Videos</h1>
+            <div class="video-grid">
+                <div class="video-thumbnail" onclick="loadVideo('videos/video1.mp4', 'Sia - Snowman Official Video')">
+                    <img src="thumbnails/video1.jpg" alt="Video 1 Thumbnail">
+                    <p>Sia - Snowman [Official Video]</p>
+                </div>
+                <div class="video-thumbnail" onclick="loadVideo('videos/video2.mp4', 'Apocalypse - Cigarettes After Sex')">
+                    <img src="thumbnails/video2.jpg" alt="Video 2 Thumbnail">
+                    <p>Apocalypse - Cigarettes After Sex</p>
+                </div>
+                <div class="video-thumbnail" onclick="loadVideo('videos/video3.mp4', 'Lord Huron - The Night We Met (Official Audio)')">
+                    <img src="thumbnails/video3.jpg" alt="Video 3 Thumbnail">
+                    <p>Lord Huron - The Night We Met (Official Audio)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Video Detail Page -->
+        <section id="video-detail" class="page hidden">
+            <h1 id="video-title">Video Title</h1>
+            <div class="video-player-container">
+                <video id="videoPlayer" controls>
+                    <source id="video-source" src="" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <p id="video-description">Description of the video goes here.</p>
+        </section>
+
+        <!-- Upload Video Page -->
+        <section id="upload-video" class="page hidden">
+            <h2>Upload Your Video</h2>
+            <form id="upload-form" enctype="multipart/form-data">
+                <label for="video-file">Choose a video file:</label>
+                <input type="file" id="video-file" name="videoFile" accept="video/*" required>
+        
+                <label for="video-title-input">Video Title:</label>
+                <input type="text" id="video-title-input" name="title" placeholder="Enter the title" required>
+        
+                <label for="video-description-input">Description:</label>
+                <textarea id="video-description-input" name="description" placeholder="Describe your video" required></textarea>
+        
+                <button type="submit">Upload Video</button>
+            </form>
+            <div id="upload-status"></div>
+        </section>
+        
+        <!-- Wallet Section -->
+        <section id="wallet" class="page hidden">
+            <h1>Wallet</h1>
+            <p>Boost your balance and unlock more content!</p>
+            <div class="credits-container">
+                <div class="info">
+                    <p><strong>1000 points = 0.001 ETH</strong></p>
+                    <p>Your Balance: <span id="current-balance">0 points</span></p>
+                    <p>ETH Balance: <span id="wallet-eth-balance">0 ETH</span></p>
+                </div>
+                <div class="input-container">
+                    <label for="credits-amount">Enter credits amount:</label>
+                    <input type="number" id="credits-amount" min="1" placeholder="e.g., 1000">
+                </div>
+                <button id="buy-credits-button">Buy Credits</button>
+            </div>
+        </section>
+
+        <!-- Profile Page -->
+        <section id="profile" class="page hidden">
+            <h1>User Profile</h1>
+            <div class="profile-container">
+                <div class="profile-info">
+                    <h2>Profile Details</h2>
+                    <div class="info-item">
+                        <strong>Username:</strong>
+                        <p id="profile-username">YourUsername</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>Wallet Address:</strong>
+                        <p id="profile-wallet-address">0xYourWalletAddress</p>
+                    </div>
+                    <div class="info-item">
+                        <strong>ETH Balance:</strong>
+                        <p id="profile-eth-balance">0 ETH</p>
+                    </div>
+                </div>
+                <div class="video-history">
+                    <h2>Video History</h2>
+                    <ul id="video-history-list">
+                        <!-- Video history items will be dynamically added here -->
+                    </ul>
+                </div>
+            </div>
+            <video width="600" controls>
+                <source src="/uploads/1726755098703-Team alma wishes (1).mp4" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+              
+        </section>
+    </main>
+
+    <!--<script src="script.js"></script>-->
+        
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js"></script>
+<script>document.addEventListener('DOMContentLoaded', async () => {
+        const pointsPerEth = 1000000; // 1 ETH = 1,000,000 points
+        let web3;
+        let contract;
+        let userAccount;
+    
+        const contractABI = [ /* Your contract ABI here */ ];
+        const contractAddress = '0xYourContractAddressHere'; // Replace with your contract address
+    
+        // Initialize Web3
+        const initWeb3 = async () => {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userAccount = accounts[0];
+                    console.log('Wallet connected:', userAccount);
+                    await initContract();
+                    await getEthBalance();
+                    updateProfile();
+                } catch (error) {
+                    console.error('Failed to connect wallet:', error);
+                }
+            } else {
+                alert('Please install MetaMask!');
+            }
+        };
+    
+        // Initialize the contract
+        const initContract = () => {
+            contract = new web3.eth.Contract(contractABI, contractAddress);
+            console.log('Contract initialized');
+        };
+    
+        // Get ETH balance
+        const getEthBalance = async () => {
+            try {
+                const balanceWei = await web3.eth.getBalance(userAccount);
+                const balanceEth = web3.utils.fromWei(balanceWei, 'ether');
+                document.getElementById('wallet-eth-balance').textContent = `${balanceEth} ETH`;
+                updateCreditsBalance(balanceEth);
+            } catch (error) {
+                console.error('Error fetching ETH balance:', error);
+            }
+        };
+    
+        // Update credits balance
+        const updateCreditsBalance = (ethBalance) => {
+            const pointsBalance = ethBalance * pointsPerEth;
+            document.getElementById('current-balance').textContent = `${pointsBalance} points`;
+        };
+    
+        // Update profile section
+        const updateProfile = async () => {
+            document.getElementById('profile-username').textContent = 'YourUsername'; // Update with actual username logic if available
+            document.getElementById('profile-wallet-address').textContent = userAccount;
+    
+            // Fetch video history from contract (example)
+            try {
+                const videoHistory = await contract.methods.getUserVideoHistory(userAccount).call();
+                const historyList = document.getElementById('video-history-list');
+                historyList.innerHTML = ''; // Clear existing list
+                videoHistory.forEach(video => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = video.title; // Assuming video object has a title property
+                    historyList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error fetching video history:', error);
+            }
+        };
+    
+        // Handle buy credits button
+        document.getElementById('buy-credits-button').addEventListener('click', async () => {
+            const creditsAmount = document.getElementById('credits-amount').value;
+            if (creditsAmount && creditsAmount > 0) {
+                try {
+                    const points = parseInt(creditsAmount);
+                    const ethAmount = points / pointsPerEth;
+                    const ethValue = web3.utils.toWei(ethAmount.toString(), 'ether');
+                    
+                    // Example contract interaction
+                    await contract.methods.buyCredits(points).send({ from: userAccount, value: ethValue });
+                    alert(`You bought ${creditsAmount} credits!`);
+                    await getEthBalance(); // Update balance after purchase
+                } catch (error) {
+                    console.error('Error buying credits:', error);
+                    alert('Failed to buy credits.');
+                }
+            } else {
+                alert('Please enter a valid credits amount.');
+            }
+        });
+    
+        // Connect Wallet button
+        document.getElementById('connect-wallet').addEventListener('click', async () => {
+            await initWeb3();
+        });
+    
+        // Load video into video player
+        window.loadVideo = async (videoUrl, title) => {
+            const videoPlayer = document.getElementById('videoPlayer');
+            const videoSource = document.getElementById('video-source');
+            const videoTitle = document.getElementById('video-title');
+            const videoDescription = document.getElementById('video-description');
+    
+            videoSource.src = videoUrl;
+            videoTitle.textContent = title;
+            videoPlayer.load();
+            showPage('video-detail');
+    
+            // Load video details from contract (example)
+            try {
+                const videoId = 1; // Example video ID
+                const video = await contract.methods.getVideo(videoId).call();
+                videoDescription.textContent = video.description; // Assuming video has a description field
+            } catch (error) {
+                console.error('Error loading video details:', error);
+            }
+        };
+    
+        // Show a specific page
+        window.showPage = (pageId) => {
+            document.querySelectorAll('.page').forEach(page => {
+                if (page.id === pageId) {
+                    page.classList.remove('hidden');
+                    page.classList.add('active');
+                } else {
+                    page.classList.remove('active');
+                    page.classList.add('hidden');
+                }
+            });
+        };
+    
+        // Handle form submissions
+        document.getElementById('login-form')?.addEventListener('submit', (event) => {
+            event.preventDefault();
+            alert('Login form submitted!');
+        });
+    
+        document.getElementById('support-form')?.addEventListener('submit', (event) => {
+            event.preventDefault();
+            alert('Support form submitted!');
+        });
+    
+        // Handle video upload form submission
+        const uploadForm = document.getElementById('upload-form');
+        const uploadStatus = document.getElementById('upload-status');
+    
+        uploadForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const fileInput = document.getElementById('video-file');
+            const videoTitle = document.getElementById('video-title-input').value;
+            const videoDescription = document.getElementById('video-description-input').value;
+    
+            if (fileInput.files.length === 0) {
+                alert('Please select a video file to upload.');
+                return;
+            }
+    
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('videoFile', file); // Use 'videoFile' as the key
+            formData.append('title', videoTitle);
+            formData.append('description', videoDescription);
+    
+            try {
+                // Make an HTTP POST request to your backend (e.g., /upload-video endpoint)
+                const response = await fetch('/upload-video', {
+                    method: 'POST',
+                    body: formData,
+                });
+    
+                if (response.ok) {
+                    const result = await response.json();
+                    uploadStatus.textContent = `Video uploaded successfully! Video Path: ${result.videoPath}`;
+                } else {
+                    uploadStatus.textContent = 'Error uploading video.';
+                }
+            } catch (error) {
+                console.error('Error uploading video:', error);
+                uploadStatus.textContent = 'Failed to upload video.';
+            }
+        });
+    
+        // Show the home page by default
+        showPage('home');
+    });
+    </script>
+</body>
+
+</html>
