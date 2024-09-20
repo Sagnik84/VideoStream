@@ -5,6 +5,7 @@ mongoose.connect('mongodb://0.0.0.0:27017/videostream')
 
 // Define a video schema
 const videoSchema = new mongoose.Schema({
+    number:{type: Number },
     title: { type: String, required: true },
     description: { type: String, required: true },
     videoPath: { type: String, required: true },
