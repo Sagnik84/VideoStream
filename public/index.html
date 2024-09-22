@@ -735,7 +735,7 @@
                     // Make an HTTP POST request to your backend (e.g., /upload-video endpoint)
                     await contract.methods.uploadVideo(videoTitle, "no url").send({ from: userAccount });
                     alert('Video uploaded successfully!');
-                    const response = await fetch('https://videostream-42wm.onrender.com/upload-video', {
+                    const response = await fetch('/upload-video', {
                         method: 'POST',
                         body: formData,
                     });
@@ -753,7 +753,7 @@
             });
 
 
-            const API_URL = 'https://videostream-42wm.onrender.com/all-video';
+            const API_URL = 'http://localhost:3000/all-video';
 
             // Event listener for button click
             document.getElementById('fetchVideosBtn').addEventListener('click', async () => {
