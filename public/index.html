@@ -84,7 +84,7 @@
             <div class="credits-container">
                 <div class="info">
                     <p><strong>1000 points = 0.001 ETH</strong></p>
-                    <p>Your Balance: <span id="current-balance-1">0 points</span></p>
+                   <!--<p>Your Balance: <span id="current-balance-1">0 points</span></p>--> 
                     <p>ETH Balance: <span id="wallet-eth-balance">0 ETH</span></p>
                 </div>
                 <div class="input-container">
@@ -507,7 +507,9 @@
 		"type": "function"
 	}
 ]
-            const contractAddress = '0xB7c6282786bD35eFaC006d22EC345f35c3D4b3b2'; // Replace with your contract address
+	
+
+            const contractAddress = '0x558BE58D5B91226E75Dca07338F19f146C3CfE7F'; // Replace with your contract address
 
             // Initialize Web3
             const initWeb3 = async () => {
@@ -550,7 +552,7 @@
             const updateCreditsBalance = async (ethBalance) => {
                 //const pointsBalance = ethBalance * pointsPerEth;
                 const balance = await contract.methods.balances(userAccount).call();
-				document.getElementById('current-balance-1').textContent = `${balance} points`;
+				//document.getElementById('current-balance-1').textContent = `${balance} points`;
 				document.getElementById('current-balance').textContent = `${balance} points`;
             };
 
