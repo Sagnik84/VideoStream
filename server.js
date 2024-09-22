@@ -21,6 +21,11 @@ const firebaseConfig = {
     appId: process.env.FIREBASE_APP_ID,
     measurementId: process.env.measurmentID,
 };
+app.use(cors({
+    origin:[process.env.FRONTEND_URL,process.env.FRONTEND_URL1],
+    methods:["GET","POST","PUT","DELETE"],
+    credentials:true,
+}))
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
