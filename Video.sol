@@ -71,6 +71,7 @@ contract StreamingService is Ownable {
 
         // Deduct balance from the buyer
         balances[msg.sender] -= 100;
+        balances[LockUnlockVideos[videoCount].owner] += 50;
 
         // Give the buyer access to the video
         LockUnlockVideos[videoNumber].hasAccess[msg.sender] = true;
