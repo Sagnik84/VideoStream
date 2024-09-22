@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
-mongoose.connect('mongodb://0.0.0.0:27017/videostream')
+import dotenv from 'dotenv';
+dotenv.config();
+mongoose.connect(`${process.env.MONGO_SERVER}`)
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
